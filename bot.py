@@ -214,7 +214,7 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    main()        return
+    main()        
     
     welcome_text = (
         f"مرحباً {user.first_name}!\n\n"
