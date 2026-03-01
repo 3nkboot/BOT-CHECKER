@@ -5,3 +5,7 @@ beautifulsoup4
 faker
 cloudscraper
 pyfiglet
+python-telegram-bot==20.7
+requests==2.31.0
+user_agent==0.1.10
+requests-toolbelt==1.0.0
