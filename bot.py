@@ -1,40 +1,97 @@
-import requests
-import base64
-import re
-import time
-import logging
 import os
 import sys
-from user_agent import generate_user_agent
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
-from telegram.error import TelegramError
+import time
+import logging
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-# إعداد التسجيل بشكل أكثر تفصيلاً
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.DEBUG  # تغيير إلى DEBUG لمزيد من التفاصيل
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 
-# توكن البوت من المتغيرات البيئية
-BOT_TOKEN = os.environ.get('8574162513:AAFTl0hvQFaCKjynyQorpOEfKk_z1nN1YpA')
-# معرف المشرف المسموح له باستخدام البوت (اختياري)
-ALLOWED_USER_ID = os.environ.get('7533168895')
+BOT_TOKEN = os.environ.get("8574162513:AAFTl0hvQFaCKjynyQorpOEfKk_z1nN1YpA")
+ALLOWED_USER_ID = os.environ.get("7533168895")  # optional
 
-# التحقق من وجود التوكن
 if not BOT_TOKEN:
-    logger.error("❌ لم يتم تعيين BOT_TOKEN. يرجى تعيينه في المتغيرات البيئية.")
+    logger.error("BOT_TOKEN is missing. Set it in environment variables.")
     sys.exit(1)
 
-logger.info(f"✅ تم تحميل التوكن بنجاح: {BOT_TOKEN[:5]}...")
 
-# جلسة requests عامة
-r = requests.Session()
+def is_allowed(user_id: int) -> bool:
+    if not ALLOWED_USER_ID:
+        return True
+    return str(user_id) == str(ALLOWED_USER_ID)
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """رسالة الترحيب - مبسطة للاختبار"""
+    user = update.effective_user
+    if user and not is_allowed(user.id):
+        await update.message.reply_text("❌ ليس لديك صلاحية لاستخدام هذا البوت.")
+        return
+
+    welcome_text = (
+        f"👋 مرحباً {user.first_name}!\n\n"
+        "✅ البوت شغال بنجاح.\n"
+        f"🕒 الوقت: {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        "اكتب /help للأوامر."
+    )
+    await update.message.reply_text(welcome_text)
+
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if user and not is_allowed(user.id):
+        await update.message.reply_text("❌ ليس لديك صلاحية لاستخدام هذا البوت.")
+        return
+
+    help_text = (
+        "🆘 مساعدة البوت\n\n"
+        "الأوامر:\n"
+        "/start - بدء\n"
+        "/help - مساعدة\n"
+        "/ping - اختبار الاتصال\n"
+    )
+    await update.message.reply_text(help_text)
+
+
+async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if user and not is_allowed(user.id):
+        await update.message.reply_text("❌ ليس لديك صلاحية لاستخدام هذا البوت.")
+        return
+
+    t0 = time.time()
+    msg = await update.message.reply_text("🏓 Ping...")
+    ms = (time.time() - t0) * 1000
+    await msg.edit_text(f"🏓 Pong! {ms:.0f}ms")
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+    logger.exception("Unhandled error: %s", context.error)
+    try:
+        if isinstance(update, Update) and update.effective_message:
+            await update.effective_message.reply_text("❌ حصل خطأ غير متوقع.")
+    except Exception:
+        pass
+
+
+def main():
+    logger.info("Starting bot...")
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("ping", ping_command))
+
+    app.add_error_handler(error_handler)
+
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()    """رسالة الترحيب - مبسطة للاختبار"""
     user = update.effective_user
     logger.info(f"📱 مستخدم جديد: {user.id} - {user.first_name}")
     
