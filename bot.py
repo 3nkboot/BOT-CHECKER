@@ -1477,8 +1477,8 @@ def main():
         sys.exit(1)
 
 # ✅ هذا هو الجزء المصحح
-if __name__ == '__main__':async def start(update'__main__':
-    main()
+if __name__ == "__main__":
+    main() 
                                           
    # """رسالة الترحيب - xt: cType.DEFAULT_TYPE):rtextTypesstart(update: Update, context: ContextTypes.DEFAULT_TYPE):
   # رسالة الترحيب - مبسطة للاختبار
