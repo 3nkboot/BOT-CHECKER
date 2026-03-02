@@ -1,4 +1,4 @@
-import requests
+TOKENNrequests
 import base64
 import re
 import time
@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # توكن البوت
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
+BOT_TOKEN = os.environ.get('8574162513:AAFTl0hvQFaCKjynyQorpOEfKk_z1nN1YpA')
 ALLOWED_USER_ID = os.environ.get('ALLOWED_USER_ID')
 
 if not BOT_TOKEN:
