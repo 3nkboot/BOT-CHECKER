@@ -1,4 +1,8 @@
-python-telegram-bot==20.7
+python-telegram-bot==20.8
 requests==2.31.0
 requests-toolbelt==1.0.0
 user-agent==0.1.10
+python-telegram-bot==20.7
+requests
+requests-toolbelt
+user-agent
