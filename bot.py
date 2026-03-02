@@ -1600,7 +1600,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass
 
 def validate_card_format(card):
-    """التحقق من صيغة البطاقة"""
+    # التحقق من صيغة البطاقة
     parts = card.split('|')
     if len(parts) != 4:
         return False
