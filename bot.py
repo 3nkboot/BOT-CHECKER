@@ -18,7 +18,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # توكن البوت
-BOT_TOKEN = os.environ.get('8574162513:AAFuxhjffUh9tP8LzDAnLostStEJV2nOkRA')
+BOT_TOKEN = os.environ.get("8574162513:AAFuxhjffUh9tP8LzDAnLostStEJV2nOkRA")
 ALLOWED_USER_ID = os.environ.get('ALLOWED_USER_ID')
 
 if not BOT_TOKEN:
