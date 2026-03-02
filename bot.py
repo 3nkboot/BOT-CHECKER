@@ -18,6 +18,235 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# توكن البوت
+BOT_TOKEN = os.environ.get('8574162513:AAFTl0hvQFaCKjynyQorpOEfKk_z1nN1YpA')
+ALLOWED_USER_ID = os.environ.get('ALLOWED_USER_ID')
+
+if not BOT_TOKEN:
+    logger.error("❌ لم يتم تعيين BOT_TOKEN")
+    sys.exit(1)
+
+# جلسة requests
+session = requests.Session()
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    logger.info(f"مستخدم جديد: {user.id}")
+    await update.message.reply_text(
+        f"👋 مرحباً {user.first_name}!\n\n"
+        "📌 الأوامر المتاحة:\n"
+        "/check [بطاقة] - فحص بطاقة واحدة\n"
+        "📎 ارفع ملف txt لفحص جميع البطاقات"
+    )
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_text = (
+        "🆘 **المساعدة**\n\n"
+        "🔹 /check رقم|شهر|سنة|cvv - فحص بطاقة\n"
+        "🔹 ارفع ملف .txt لفحص عدة بطاقات\n\n"
+        "مثال: 4111111111111111|12|25|123"
+    )
+    await update.message.reply_text(help_text, parse_mode='Markdown')
+
+async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    start = time.time()
+    msg = await update.message.reply_text("🏓 Ping...")
+    end = time.time()
+    await msg.edit_text(f"🏓 Pong! {round((end-start)*1000)}ms")
+
+async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    
+    if ALLOWED_USER_ID and str(user.id) != ALLOWED_USER_ID:
+        return await update.message.reply_text("❌ غير مصرح")
+    
+    if not context.args:
+        return await update.message.reply_text("❌ استخدم: /check رقم|شهر|سنة|cvv")
+    
+    card = ' '.join(context.args).strip()
+    
+    if not validate_card(card):
+        return await update.message.reply_text("❌ صيغة البطاقة خطأ")
+    
+    msg = await update.message.reply_text("🔄 جاري الفحص...")
+    result = check_card(card)
+    
+    emoji = "✅" if "موافقة" in result else "❌"
+    await msg.edit_text(f"{emoji} **النتيجة:**\n`{card}`\n{result}")
+
+async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    
+    if ALLOWED_USER_ID and str(user.id) != ALLOWED_USER_ID:
+        return await update.message.reply_text("❌ غير مصرح")
+    
+    if not update.message.document:
+        return
+    
+    file = await update.message.document.get_file()
+    file_name = update.message.document.file_name
+    
+    if not file_name.endswith('.txt'):
+        return await update.message.reply_text("❌ ارفع ملف .txt فقط")
+    
+    status = await update.message.reply_text("📥 جاري التحميل...")
+    
+    try:
+        # تحميل الملف
+        file_path = f"/tmp/{file_name}"
+        await file.download_to_drive(file_path)
+        
+        # قراءة الملف
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+        
+        os.remove(file_path)
+        
+        # استخراج البطاقات الصحيحة
+        cards = []
+        for line in lines:
+            card = line.strip()
+            if card and validate_card(card):
+                cards.append(card)
+        
+        if not cards:
+            return await status.edit_text("❌ لا توجد بطاقات صحيحة")
+        
+        await status.edit_text(f"✅ وجدت {len(cards)} بطاقة\n🔄 جاري الفحص...")
+        
+        # فحص البطاقات
+        approved = []
+        declined = []
+        errors = []
+        
+        for i, card in enumerate(cards):
+            try:
+                result = check_card(card)
+                if "موافقة" in result:
+                    approved.append(card)
+                elif "رفض" in result:
+                    declined.append(card)
+                else:
+                    errors.append(card)
+            except:
+                errors.append(card)
+            
+            # تحديث كل 20 بطاقة
+            if (i+1) % 20 == 0:
+                await status.edit_text(f"📊 تم فحص {i+1}/{len(cards)}")
+        
+        # النتائج
+        result_text = (
+            f"📊 **نتائج الفحص**\n"
+            f"📄 الملف: {file_name}\n"
+            f"📝 المجموع: {len(cards)}\n"
+            f"✅ مقبول: {len(approved)}\n"
+            f"❌ مرفوض: {len(declined)}\n"
+            f"⚠️ أخطاء: {len(errors)}\n\n"
+        )
+        
+        # أمثلة (أول 3)
+        if approved:
+            result_text += "**✅ أمثلة مقبولة:**\n"
+            for card in approved[:3]:
+                result_text += f"• `{card[:6]}******{card[-4:]}`\n"
+        
+        await update.message.reply_text(result_text, parse_mode='Markdown')
+        
+    except Exception as e:
+        await status.edit_text(f"❌ خطأ: {str(e)}")
+
+def validate_card(card):
+    """التحقق من صحة البطاقة"""
+    try:
+        parts = card.split('|')
+        if len(parts) != 4:
+            return False
+        
+        number, month, year, cvv = [p.strip() for p in parts]
+        
+        if not number.isdigit() or len(number) < 15:
+            return False
+        if not month.isdigit() or int(month) < 1 or int(month) > 12:
+            return False
+        if not year.isdigit() or len(year) not in [2, 4]:
+            return False
+        if not cvv.isdigit() or len(cvv) < 3:
+            return False
+            
+        return True
+    except:
+        return False
+
+def check_card(card):
+    """فحص البطاقة"""
+    try:
+        parts = card.split('|')
+        number = parts[0].strip()
+        
+        # محاكاة فحص (يمكنك استبدالها بالفحص الحقيقي)
+        time.sleep(0.3)
+        
+        if number.startswith('4'):
+            return "✅ موافقة - فيزا"
+        elif number.startswith('5'):
+            return "✅ موافقة - ماستركارد"
+        elif number.startswith('3'):
+            return "✅ موافقة - امريكان اكسبريس"
+        else:
+            return "❌ رفض - نوع غير معروف"
+            
+    except Exception as e:
+        return f"⚠️ خطأ: {str(e)}"
+
+def main():
+    """الدالة الرئيسية"""
+    logger.info("🚀 بدء تشغيل البوت...")
+    
+    try:
+        # إنشاء التطبيق
+        app = Application.builder().token(BOT_TOKEN).build()
+        
+        # إضافة المعالجات
+        app.add_handler(CommandHandler("start", start))
+        app.add_handler(CommandHandler("help", help_command))
+        app.add_handler(CommandHandler("ping", ping_command))
+        app.add_handler(CommandHandler("check", check_single))
+        app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
+        app.add_error_handler(error_handler)
+        
+        logger.info("✅ البوت جاهز للعمل")
+        app.run_polling()
+        
+    except Exception as e:
+        logger.error(f"❌ خطأ: {e}")
+        sys.exit(1)
+
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.error(f"حدث خطأ: {context.error}")
+
+# ✅ هذا هو السطر الصحيح (السطر 218 الآن)
+if __name__ == "__main__":
+    main() requests
+import base64
+import re
+import time
+import logging
+import os
+import sys
+from user_agent import generate_user_agent
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
+from telegram.error import TelegramError
+
+# إعداد التسجيل
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
 # توكن البوت من المتغيرات البيئية
 BOT_TOKEN = os.environ.get('8574162513:AAFTl0hvQFaCKjynyQorpOEfKk_z1nN1YpA')
 
