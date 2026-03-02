@@ -11,6 +11,223 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 from telegram.error import TelegramError
 
+# إعداد التسجيل
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+# توكن البوت من المتغيرات البيئية
+BOT_TOKEN = os.environ.get('8574162513:AAFTl0hvQFaCKjynyQorpOEfKk_z1nN1YpA')
+
+# معرف المشرف المسموح له باستخدام البوت (اختياري)
+ALLOWED_USER_ID = os.environ.get('ALLOWED_USER_ID')
+
+if not BOT_TOKEN:
+    logger.error("❌ لم يتم تعيين BOT_TOKEN. يرجى تعيينه في المتغيرات البيئية.")
+    sys.exit(1)
+
+logger.info("✅ تم تحميل التوكن بنجاح")
+
+# جلسة requests عامة
+session = requests.Session()
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    logger.info(f"📱 مستخدم جديد: {user.id}")
+    await update.message.reply_text(
+        f"👋 مرحباً {user.first_name}!\n\n"
+        "أرسل /help لمعرفة الأوامر المتاحة."
+    )
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_text = (
+        "🆘 **المساعدة**\n\n"
+        "🔹 /check [البطاقة] - فحص بطاقة واحدة\n"
+        "🔹 ارفع ملف `.txt` لفحص جميع البطاقات فيه\n\n"
+        "**صيغة البطاقة:**\n"
+        "رقم|شهر|سنة|cvv\n"
+        "مثال: 4111111111111111|12|25|123"
+    )
+    await update.message.reply_text(help_text, parse_mode='Markdown')
+
+async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    start = time.time()
+    msg = await update.message.reply_text("🏓 جاري الاختبار...")
+    end = time.time()
+    await msg.edit_text(f"🏓 **الاستجابة:** {round((end-start)*1000)}ms")
+
+async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if ALLOWED_USER_ID and str(user.id) != ALLOWED_USER_ID:
+        return await update.message.reply_text("❌ غير مصرح لك.")
+    
+    if not context.args:
+        return await update.message.reply_text("❌ استخدم: /check رقم|شهر|سنة|cvv")
+    
+    card = ' '.join(context.args).strip()
+    if not validate_card_format(card):
+        return await update.message.reply_text("❌ صيغة البطاقة غير صحيحة.")
+    
+    msg = await update.message.reply_text("🔄 جاري الفحص...")
+    result = check_card(card)
+    emoji = "✅" if "موافقة" in result else "❌"
+    await msg.edit_text(f"{emoji} **النتيجة:**\n`{card}`\n{result}")
+
+async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if ALLOWED_USER_ID and str(user.id) != ALLOWED_USER_ID:
+        return await update.message.reply_text("❌ غير مصرح لك.")
+    
+    if not update.message.document:
+        return
+    
+    file = await update.message.document.get_file()
+    file_name = update.message.document.file_name
+    if not file_name.endswith('.txt'):
+        return await update.message.reply_text("❌ يرجى رفع ملف .txt")
+    
+    status = await update.message.reply_text("📥 جاري تحميل الملف...")
+    
+    try:
+        # تحميل الملف
+        file_path = f"/tmp/{file_name}"
+        await file.download_to_drive(file_path)
+        
+        # قراءة السطور
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            lines = f.readlines()
+        
+        os.remove(file_path)
+        
+        # استخراج البطاقات الصحيحة
+        valid_cards = []
+        for line in lines:
+            card = line.strip()
+            if card and validate_card_format(card):
+                valid_cards.append(card)
+        
+        if not valid_cards:
+            return await status.edit_text("❌ لا توجد بطاقات صحيحة في الملف.")
+        
+        await status.edit_text(f"✅ تم العثور على {len(valid_cards)} بطاقة صحيحة.\n🔄 جاري الفحص...")
+        
+        # فحص جميع البطاقات
+        results = {'approved': [], 'declined': [], 'errors': []}
+        start_time = time.time()
+        
+        for i, card in enumerate(valid_cards):
+            try:
+                res = check_card(card)
+                if "موافقة" in res:
+                    results['approved'].append((card, res))
+                elif "رفض" in res:
+                    results['declined'].append((card, res))
+                else:
+                    results['errors'].append((card, res))
+            except:
+                results['errors'].append((card, "خطأ أثناء الفحص"))
+            
+            # تحديث كل 20 بطاقة
+            if (i+1) % 20 == 0:
+                await status.edit_text(f"📊 تم فحص {i+1}/{len(valid_cards)} بطاقة...")
+        
+        # إعداد التقرير النهائي
+        total_time = time.time() - start_time
+        report = (
+            f"📊 **تقرير فحص الملف**\n"
+            f"📄 اسم الملف: `{file_name}`\n"
+            f"📝 إجمالي البطاقات: {len(valid_cards)}\n"
+            f"✅ مقبولة: {len(results['approved'])}\n"
+            f"❌ مرفوضة: {len(results['declined'])}\n"
+            f"⚠️ أخطاء: {len(results['errors'])}\n"
+            f"⏱️ الوقت: {total_time:.1f} ثانية\n\n"
+        )
+        
+        # إضافة أمثلة (أول 5 من كل فئة)
+        if results['approved']:
+            report += "**✅ أمثلة للمقبولة:**\n"
+            for card, res in results['approved'][:5]:
+                masked = card[:6] + "******" + card[-4:]
+                report += f"• {masked} → {res}\n"
+        
+        if len(report) > 4000:
+            report = report[:4000] + "...\n(الرسالة مقطوعة للطول)"
+        
+        await update.message.reply_text(report, parse_mode='Markdown')
+        
+    except Exception as e:
+        logger.error(f"خطأ في معالجة الملف: {e}")
+        await status.edit_text(f"❌ حدث خطأ: {str(e)}")
+
+def validate_card_format(card):
+    parts = card.split('|')
+    if len(parts) != 4:
+        return False
+    if not all(parts):
+        return False
+    if not parts[0].strip().isdigit():
+        return False
+    return True
+
+def check_card(card_data):
+    try:
+        parts = card_data.split('|')
+        n, mm, yy, cvc = [p.strip() for p in parts]
+        
+        # تحقق بسيط
+        if not n.isdigit() or len(n) < 15:
+            return "❌ رفض - رقم غير صالح"
+        if not mm.isdigit() or not (1 <= int(mm) <= 12):
+            return "❌ رفض - شهر غير صالح"
+        if not yy.isdigit() or len(yy) not in (2,4):
+            return "❌ رفض - سنة غير صالحة"
+        if not cvc.isdigit() or len(cvc) < 3:
+            return "❌ رفض - CVV غير صالح"
+        
+        # محاكاة نتيجة (يمكنك استبدالها بفحص حقيقي)
+        time.sleep(0.3)
+        if n.startswith('4'):
+            return "✅ موافقة - فيزا"
+        elif n.startswith('5'):
+            return "✅ موافقة - ماستركارد"
+        else:
+            return "❌ رفض - نوع غير مدعوم"
+    except Exception as e:
+        return f"⚠️ خطأ: {str(e)}"
+
+def main():
+    logger.info("🚀 بدء تشغيل البوت...")
+    app = Application.builder().token(BOT_TOKEN).build()
+    
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("ping", ping_command))
+    app.add_handler(CommandHandler("check", check_single))
+    app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
+    app.add_error_handler(error_handler)
+    
+    logger.info("✅ البوت جاهز!")
+    app.run_polling()
+
+async def error_handler(update, context):
+    logger.error(f"Exception: {context.error}")
+
+if __name__ == "__main__":
+    main() requests
+import base64
+import re
+import time
+import logging
+import os
+import sys
+from user_agent import generate_user_agent
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
+from telegram.error import TelegramError
+
 # إعداد التسجيل بشكل أكثر تفصيلاً
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
