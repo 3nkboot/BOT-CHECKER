@@ -1342,7 +1342,7 @@ async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # التحقق من وجود البطاقة
     if not context.args:
-        await update.message.reply_text(
+        await update.messge.repply_text(
             "❌ يرجى إدخال البطاقة\n"
             "مثال: `/check 4111111111111111|12|25|123`"
         )
@@ -1658,7 +1658,7 @@ def m3_iw(ccx):
         return f"خطأ في الفحص: {str(e)}"
 
 def main():
-    """الدالة الرئيسية"""
+    # الداله الرئسيه
     logger.info("🚀 بدء تشغيل البوت...")
     
     try:
