@@ -390,7 +390,7 @@ def main():
 
 # ✅ هذا هو الشرط الصحيح لبدء التشغيل
 if __name__ == "__main__":
-    main() requests
+    main() 
 import base64
 import re
 import time
