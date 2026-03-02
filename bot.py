@@ -32,7 +32,7 @@ logger.info("✅ تم تحميل التوكن بنجاح")
 session = requests.Session()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """رسالة البداية"""
+    # """رسالة البداية"""
     user = update.effective_user
     logger.info(f"مستخدم جديد: {user.id}")
     
@@ -51,7 +51,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode='Markdown')
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """مساعدة البوت"""
+    # """مساعدة البوت"""
     text = (
         "🆘 **مساعدة البوت**\n\n"
         "**1. فحص بطاقة واحدة:**\n"
@@ -67,7 +67,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode='Markdown')
 
 async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """اختبار الاتصال"""
+  #  """اختبار الاتصال"""
     start = time.time()
     msg = await update.message.reply_text("🏓 جاري الاختبار...")
     end = time.time()
@@ -75,7 +75,7 @@ async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.edit_text(f"🏓 **البوت يعمل!**\n⏱️ زمن الاستجابة: {ping}ms")
 
 async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """فحص بطاقة واحدة"""
+ #   """فحص بطاقة واحدة"""
     user = update.effective_user
     
     # التحقق من الصلاحية
@@ -115,7 +115,7 @@ async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await msg.edit_text(f"❌ خطأ: {str(e)}")
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """معالجة الملفات وفحص جميع البطاقات"""
+   # """معالجة الملفات وفحص جميع البطاقات"""
     user = update.effective_user
     
     # التحقق من الصلاحية
@@ -279,7 +279,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status_msg.edit_text(f"❌ حدث خطأ: {str(e)}")
 
 def validate_card(card):
-    """التحقق من صحة البطاقة"""
+   # """التحقق من صحة البطاقة"""
     try:
         parts = card.split('|')
         if len(parts) != 4:
@@ -312,7 +312,7 @@ def validate_card(card):
         return False
 
 def check_card(card):
-    """فحص البطاقة - استبدل هذا بكود الفحص الحقيقي"""
+   # """فحص البطاقة - استبدل هذا بكود الفحص الحقيقي"""
     try:
         parts = card.split('|')
         number = parts[0].strip()
@@ -549,7 +549,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status.edit_text(f"❌ خطأ: {str(e)}")
 
 def validate_card(card):
-    """التحقق من صحة البطاقة"""
+   # """التحقق من صحة البطاقة"""
     try:
         parts = card.split('|')
         if len(parts) != 4:
@@ -571,7 +571,7 @@ def validate_card(card):
         return False
 
 def check_card(card):
-    """فحص البطاقة"""
+   # """فحص البطاقة"""
     try:
         parts = card.split('|')
         number = parts[0].strip()
@@ -592,7 +592,7 @@ def check_card(card):
         return f"⚠️ خطأ: {str(e)}"
 
 def main():
-    """الدالة الرئيسية"""
+   # """الدالة الرئيسية"""
     logger.info("🚀 بدء تشغيل البوت...")
     
     try:
@@ -896,7 +896,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ حدث خطأ: {str(e)}")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """أمر المساعدة"""
+   # """أمر المساعدة"""
     user = update.effective_user
     logger.info(f"📱 أمر help من المستخدم: {user.id}")
     
@@ -921,7 +921,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(help_text, parse_mode='Markdown')
 
 async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """أمر اختبار الاتصال"""
+   # """أمر اختبار الاتصال"""
     user = update.effective_user
     logger.info(f"📱 أمر ping من المستخدم: {user.id}")
     
@@ -933,7 +933,7 @@ async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"🏓 **بونغ!**\n⏱️ وقت الاستجابة: {response_time:.2f} مللي ثانية", parse_mode='Markdown')
 
 async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """فحص بطاقة واحدة"""
+ #   """فحص بطاقة واحدة"""
     user = update.effective_user
     logger.info(f"📱 أمر check من المستخدم: {user.id}")
     
@@ -983,7 +983,7 @@ async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status_msg.edit_text(f"❌ خطأ: {str(e)}")
 
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """معالجة الملفات المرفوعة وفحص جميع البطاقات"""
+  #  """معالجة الملفات المرفوعة وفحص جميع البطاقات"""
     user = update.effective_user
     logger.info(f"📱 ملف جديد من المستخدم: {user.id}")
     
@@ -1138,7 +1138,7 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status_msg.edit_text(f"❌ حدث خطأ: {str(e)}")
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """معالج الأخطاء العام"""
+  #  """معالج الأخطاء العام"""
     logger.error(f"❌ حدث خطأ: {context.error}")
     
     try:
@@ -1150,7 +1150,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass
 
 def validate_card_format(card):
-    """التحقق من صيغة البطاقة"""
+    # التحقق من صيغة البطاقة
     parts = card.split('|')
     if len(parts) != 4:
         return False
@@ -1161,7 +1161,7 @@ def validate_card_format(card):
     return True
 
 def check_card(ccx):
-    """دالة فحص البطاقة"""
+    # دالة فحص البطاقة
     try:
         ccx = ccx.strip()
         parts = ccx.split("|")
@@ -1208,7 +1208,7 @@ def check_card(ccx):
         return f"خطأ في الفحص: {str(e)}"
 
 def main():
-    """الدالة الرئيسية"""
+    # الدالة الرئيسية
     logger.info("🚀 بدء تشغيل البوت...")
     
     try:
@@ -1276,7 +1276,7 @@ logger.info(f"✅ تم تحميل التوكن بنجاح: {BOT_TOKEN[:5]}...")
 r = requests.Session()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """رسالة الترحيب"""
+    # رسالة الترحيب
     user = update.effective_user
     logger.info(f"📱 مستخدم جديد: {user.id} - {user.first_name}")
     
@@ -1299,7 +1299,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ حدث خطأ: {str(e)}")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """أمر المساعدة"""
+    # أمر المساعدة
     user = update.effective_user
     logger.info(f"📱 أمر help من المستخدم: {user.id}")
     
@@ -1331,7 +1331,7 @@ async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"🏓 **بونغ!**\n⏱️ وقت الاستجابة: {response_time:.2f} مللي ثانية", parse_mode='Markdown')
 
 async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """فحص بطاقة واحدة"""
+    # فحص بطاقة واحدة
     user = update.effective_user
     logger.info(f"📱 أمر check من المستخدم: {user.id}")
     
@@ -1526,7 +1526,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(help_text, parse_mode='Markdown')
 
 async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """أمر اختبار الاتصال"""
+    # أمر اختبار الاتصال
     user = update.effective_user
     logger.info(f"📱 أمر ping من المستخدم: {user.id}")
     
@@ -1588,7 +1588,7 @@ async def check_single(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status_msg.edit_text(f"❌ خطأ: {str(e)}")
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # معالج الأخطاء العام
+  # معالج الأخطاء معالج
     logger.error(f"❌ حدث خطأ: {context.error}")
     
     try:
