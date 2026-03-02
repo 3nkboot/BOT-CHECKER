@@ -619,7 +619,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ✅ هذا هو السطر الصحيح (السطر 218 الآن)
 if __name__ == "__main__":
-    main() requests
+    main() 
 import base64
 import re
 import time
@@ -836,7 +836,7 @@ async def error_handler(update, context):
     logger.error(f"Exception: {context.error}")
 
 if __name__ == "__main__":
-    main() requests
+    main() 
 import base64
 import re
 import time
@@ -1239,7 +1239,7 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    main() requests
+    main() 
 import base64
 import re
 import time
