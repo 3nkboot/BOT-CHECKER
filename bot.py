@@ -1611,7 +1611,7 @@ def validate_card_format(card):
     return True
 
 def m3_iw(ccx):
-    """دالة الفحص الأصلية مع تحسين معالجة الأخطاء"""
+  # دالة الفحص الأصلية مع تحسين معالجة الأخطاء
     try:
         ccx = ccx.strip()
         parts = ccx.split("|")
