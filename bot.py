@@ -1480,7 +1480,7 @@ def main():
 if __name__ == '__main__':async def start(update'__main__':
     main()
                                           
-    """رسالة الترحيب - xt: cType.DEFAULT_TYPE):rtextTypesstart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+   # """رسالة الترحيب - xt: cType.DEFAULT_TYPE):rtextTypesstart(update: Update, context: ContextTypes.DEFAULT_TYPE):
   # رسالة الترحيب - مبسطة للاختبار
     user = update.effective_user
     logger.info(f"📱 مستخدم جديد: {user.id} - {user.first_name}")
