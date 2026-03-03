@@ -10,8 +10,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 BOT_TOKEN = os.environ.get("8574162513:AAGVLv_J6jXG61Yd2CY9tWucWm4r4boIaTw")
-if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN is missing")
+if not BOT_TOKEN: raise RuntimeError("BOT_TOKEN is missing")
 
 session = requests.Session()
 
