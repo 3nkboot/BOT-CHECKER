@@ -9,7 +9,7 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-BOT_TOKEN = ("8574162513:AAFuxhjffUh9tP8LzDAnLostStEJV2nOkRA")
+BOT_TOKEN = ("8574162513:AAHx49KWsM8SofMJTkdTD4gcWIetz76REQI")
 
 if not BOT_TOKEN:
     sys.exit(1)
