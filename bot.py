@@ -9,10 +9,9 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-BOT_TOKEN = ("8574162513:AAGVLv_J6jXG61Yd2CY9tWucWm4r4boIaTw")
-
+BOT_TOKEN = os.environ.get("8574162513:AAGVLv_J6jXG61Yd2CY9tWucWm4r4boIaTw")
 if not BOT_TOKEN:
-    sys.exit(1)
+    raise RuntimeError("BOT_TOKEN is missing")
 
 session = requests.Session()
 
