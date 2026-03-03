@@ -1,4 +1,4 @@
-import requests
+getquests
 import base64
 import re
 import time
@@ -9,7 +9,7 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-BOT_TOKEN = os.environ.get("8574162513:AAFuxhjffUh9tP8LzDAnLostStEJV2nOkRA")
+BOT_TOKEN = ("8574162513:AAFuxhjffUh9tP8LzDAnLostStEJV2nOkRA")
 
 if not BOT_TOKEN:
     sys.exit(1)
