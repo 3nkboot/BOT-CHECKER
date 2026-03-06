@@ -3,3 +3,4 @@ requests
 user-agent
 requests-toolbelt
 telebot
+faker
