@@ -4,3 +4,4 @@ user-agent
 requests-toolbelt
 telebot
 faker
+bs4
