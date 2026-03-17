@@ -1,7 +1,4 @@
-python-telegram-bot==20.7
+python-telegram-bot
 requests
-user-agent
 requests-toolbelt
-telebot
-faker
-bs4
+urllib3
