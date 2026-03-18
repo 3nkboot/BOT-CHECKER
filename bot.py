@@ -121,7 +121,7 @@ def check_card(ccx, amount, gate_key):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID: return
     welcome = (
-        "👋 أهلاً بك في بوت فحص البطاقات الاحترافي!
+        "👋 أهلاً بك في بوت فحص البطاقات الاحترافي!" 
 
         " 🚀 طريقة الاستخدام:" 
 "• أرسل البطاقة بصيغة: cc|mm|yy|cvv للفحص الفردي." 
