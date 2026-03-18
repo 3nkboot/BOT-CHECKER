@@ -96,7 +96,7 @@ def check_card(ccx, amount, gate_key):
         mp = MultipartEncoder(fields={
             'give-honeypot': '', 'give-form-id-prefix': fp, 'give-form-id': fi,
             'give-form-hash': nc, 'give-amount': amount, 'payment-mode': 'paypal-commerce',
-            'give_first': 'DRGAM', 'give_last': 'rights', 'give_email': email,
+            'give_first': 'SIKO', 'give_last': 'rights', 'give_email': email,
             'give_action': 'purchase', 'give-gateway': 'paypal-commerce', 'action': 'give_process_donation', 'give_ajax': 'true'
         })
         headers['content-type'] = mp.content_type
@@ -121,11 +121,18 @@ def check_card(ccx, amount, gate_key):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID: return
     welcome = (
-        "👋 <b>أهلاً بك في بوت الفحص المطور!</b>\n\n"
-        "🛠 <b>الأوامر:</b>\n"
-        "• /amount [القيمة] - تحديد المبلغ.\n"
-        "• /stop - إيقاف الفحص.\n\n"
-        "💳 أرسل البطاقة أو ملف الكومبو للبدء."
+        "👋 أهلاً بك في بوت فحص البطاقات الاحترافي!
+
+🚀 طريقة الاستخدام:
+• أرسل البطاقة بصيغة: cc|mm|yy|cvv للفحص الفردي.
+• أرسل ملف نصي (Combo) للفحص الجماعي.
+
+🛠 الأوامر المتاحة:
+• /start - بدء تشغيل البوت.
+• /amount [القيمة] - تحديد مبلغ الفحص (مثلاً: /amount 0.4).
+• /stop - إيقاف عملية الفحص الجارية.
+
+✨ البوت يعمل الآن ومستعد لخدمتك!"
     )
     await update.message.reply_text(welcome, parse_mode='HTML')
 
@@ -263,7 +270,7 @@ async def process_file(message, file_id, file_name, gate_key, user):
         await asyncio.sleep(0.1)
     
     os.remove(path)
-    await message.reply_text(f"🏁 انتهى الفحص! تم شحن {charged} بطاقة.")
+    await message.reply_text(f"🏁 انتهى الفحص! Charge {charged} بطاقة.")
 
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
